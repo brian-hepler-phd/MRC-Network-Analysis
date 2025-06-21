@@ -1,0 +1,4 @@
+Please download the arXiv dataset from:
+https://www.kaggle.com/datasets/Cornell-University/arxiv
+
+Place the 'arxiv-metadata-oai-snapshot.json' file in this directory.

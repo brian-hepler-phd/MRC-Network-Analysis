@@ -423,7 +423,7 @@ def main():
     """
     # Initialize visualizer with your data files
     visualizer = EnhancedNetworkVisualizer(
-        'results/collaboration_analysis/topic_classifications_20250612_130755.csv',  # Update with your actual file path
+        'results/collaboration_analysis/topic_classifications_[YOUR_TIMESTAMP].csv',  # Update with your actual file path
         'data/cleaned/author_topic_networks_disambiguated_v4.csv'                   # Update with your actual file path
     )
     

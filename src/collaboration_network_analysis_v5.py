@@ -46,7 +46,7 @@ class CollaborationNetworkAnalyzer:
     Version 5 with fixed Small World Coefficient calculation.
     """
     
-    def __init__(self, data_path: str = "../data/cleaned/author_topic_networks.csv"):
+    def __init__(self, data_path: str = "data/cleaned/author_topic_networks_disambiguated_v4.csv"):
         self.data_path = Path(data_path)
         self.results_dir = Path("results/collaboration_analysis")
         self.results_dir.mkdir(parents=True, exist_ok=True)
@@ -947,7 +947,7 @@ class CollaborationNetworkAnalyzer:
 def main():
     """Main analysis function."""
     parser = argparse.ArgumentParser(description="10-Metric Collaboration Network Analysis V5 with Fixed SWC")
-    parser.add_argument("--data-path", default="data/cleaned/author_topic_networks.csv", 
+    parser.add_argument("--data-path", default="data/cleaned/author_topic_networks_disambiguated_v4.csv", 
                         help="Path to author-topic networks CSV")
     parser.add_argument("--sample-topics", type=str, default=None,
                         help="Comma-separated list of topics to analyze (default: all)")
