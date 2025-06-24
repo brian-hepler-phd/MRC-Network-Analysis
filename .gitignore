@@ -16,6 +16,9 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
+# Timestamps for pipeline runs 
+.stamp_*
+
 # Do not track large data files or generated results.
 # The repository should only contain code and small summary files.
 data/raw/*.json
