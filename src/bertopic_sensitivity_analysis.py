@@ -25,6 +25,7 @@ import numpy as np
 from datetime import datetime
 from typing import Dict, List, Tuple
 from itertools import product
+from src.config_manager import ConfigManager
 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score
@@ -498,10 +499,13 @@ def generate_interpretation(stability_metrics, parameter_analysis, summary):
 def main():
     """Main execution function."""
     args = parse_arguments()
+
+    config = ConfigManager()
+    args.custom_csv = config.get_path('cleaned_snapshot', section='static_inputs')
     
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
-    
+
     # Load and prepare data
     df = load_and_sample_data(args.custom_csv, args.sample_size)
     docs = df["text_for_nlp"].tolist()

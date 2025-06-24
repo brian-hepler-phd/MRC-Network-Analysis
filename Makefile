@@ -9,14 +9,13 @@
 # make all         : Run the core pipeline, only rebuilding what's necessary.
 # make clean       : Remove all generated files and stamps.
 # make figures     : Ensure the final manuscript figures are up-to-date.
+# make sensitivity : Run all validation and sensitivity analyses.
+# make bootstrap   : Run the bootstrap CI analysis.
 
 # --- Configuration ---
 PYTHON = python3
 CONFIG_FILE = config.yaml
-# Define the static input file that the whole pipeline depends on.
 STATIC_INPUT = data/cleaned/math_arxiv_snapshot.csv
-
-# Define all the Python source scripts as a variable for cleaner rules.
 SRC_FILES = $(wildcard src/*.py)
 
 # Define the stamp files that represent the completion of each step.
@@ -29,7 +28,7 @@ STAMP_REGRESSION = .stamp_regression
 STAMP_VISUALIZE = .stamp_visualize
 
 # --- High-Level Targets ---
-.PHONY: all clean figures
+.PHONY: all clean figures sensitivity bootstrap
 
 all: $(STAMP_REGRESSION)
 	@echo "✅ Core pipeline is up-to-date."
@@ -77,14 +76,37 @@ $(STAMP_REGRESSION): $(STAMP_COMPARE) src/fixed_regression_analysis.py src/enhan
 	$(PYTHON) src/enhanced_regression.py
 	@touch $(STAMP_REGRESSION)
 
-# Step 6: Final Visualizations
+# Step 7: Final Visualizations
+# Note: Renamed from Step 6 to Step 7 to match original README.
 $(STAMP_VISUALIZE): $(STAMP_COMPARE) $(STAMP_DISAMBIGUATE) src/enhanced_network_viz.py src/config_manager.py $(CONFIG_FILE)
 	@echo "\n--- Running Step 7: Generating Manuscript Figures ---"
 	$(PYTHON) src/enhanced_network_viz.py
 	@touch $(STAMP_VISUALIZE)
 
+# ==================================
+# --- VALIDATION & EXTRA ANALYSES ---
+# ==================================
 
+.PHONY: sensitivity bootstrap
+
+# A target to run all sensitivity analyses.
+# It depends on the main data file and the final comparison step from the core pipeline.
+sensitivity: $(STAMP_COMPARE) $(STATIC_INPUT)
+	@echo "\n--- Running All Sensitivity and Validation Analyses ---"
+	$(PYTHON) src/sensitivity_analysis.py
+	$(PYTHON) src/bertopic_sensitivity_analysis.py
+	$(PYTHON) src/covid_temporal_sensitivity.py --arxiv-data $(STATIC_INPUT)
+
+# Step 5b: Run bootstrap analysis for more robust CIs.
+# This depends on the metrics being calculated.
+bootstrap: $(STAMP_METRICS)
+	@echo "\n--- Running Step 5b: Bootstrap CI Analysis ---"
+	$(PYTHON) src/bootstrap_CI_analysis.py
+
+# ==================
 # --- Housekeeping ---
+# ==================
+
 .PHONY: clean
 
 clean:

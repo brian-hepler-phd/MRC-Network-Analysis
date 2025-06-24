@@ -26,6 +26,7 @@ import logging
 from datetime import datetime
 import matplotlib.pyplot as plt
 import seaborn as sns
+from src.config_manager import ConfigManager
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -584,9 +585,10 @@ class SensitivityAnalyzer:
 def main():
     """Main sensitivity analysis function."""
     parser = argparse.ArgumentParser(description="Sensitivity Analysis: Popular vs Niche Topics")
-    parser.add_argument("--results-file", 
-                       default="results/collaboration_analysis/topic_analysis_10metrics_20250604_115101.json",
-                       help="Path to pre-computed topic analysis results JSON file")
+    #parser.add_argument("--results-file", 
+    #                   default="results/collaboration_analysis/topic_analysis_10metrics_20250604_115101.json",
+    #                   help="Path to pre-computed topic analysis results JSON file")
+
     parser.add_argument("--cutoffs", nargs="+", type=float, 
                        default=[0.15, 0.20, 0.25, 0.30],
                        help="List of percentile cutoffs to test (default: 0.15 0.20 0.25 0.30)")
@@ -596,8 +598,12 @@ def main():
     args = parser.parse_args()
     
     try:
+        # Load in filepaths from CONFIG
+        config = ConfigManager()
+        input_path = config.get_path('network_metrics_path')
+
         # Initialize analyzer
-        analyzer = SensitivityAnalyzer(args.results_file)
+        analyzer = SensitivityAnalyzer(input_path)
         
         # Load pre-computed results
         df = analyzer.load_results()

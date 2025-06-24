@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 from tqdm import tqdm
+from src.config_manager import ConfigManager
 
 def load_real_topic_data(json_file):
     """Load the real topic metrics from your JSON file."""
@@ -375,10 +376,14 @@ def save_bootstrap_results(results, mann_whitney_results, popular_df, niche_df, 
 def main():
     """Run enhanced bootstrap analysis on real data."""
     import sys
-    if len(sys.argv) > 1:
-        json_file = sys.argv[1]
-    else:
-        json_file = 'results/collaboration_analysis/topic_analysis_10metrics_20250607_124314.json'
+
+    config = ConfigManager()
+    json_file = config.get_path('network_metrics_path')
+
+    #if len(sys.argv) > 1:
+    #    json_file = sys.argv[1]
+    #else:
+    #    json_file = 'results/collaboration_analysis/topic_analysis_10metrics_20250607_124314.json'
     
     df = load_real_topic_data(json_file)
 
