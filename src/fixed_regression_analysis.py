@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 """
 Fixed Advanced Regression Analysis with Standardized Coefficients
 ================================================================
@@ -22,18 +28,21 @@ from scipy import stats
 from sklearn.preprocessing import StandardScaler
 import seaborn as sns
 import matplotlib.pyplot as plt
-from pathlib import Path
 from datetime import datetime
 import warnings
 warnings.filterwarnings('ignore')
+
+# CONFIG
+from src.config_manager import ConfigManager
 
 class FixedNetworkRegressionAnalyzer:
     """
     Fixed regression analysis with standardized coefficients and numerical stability.
     """
     
-    def __init__(self, topic_data_file: str):
-        self.topic_data_file = Path(topic_data_file)
+    def __init__(self, df: pd.DataFrame):
+
+        self.df = df
         self.results_dir = Path("results/regression_analysis_fixed")
         self.results_dir.mkdir(parents=True, exist_ok=True)
         
@@ -51,66 +60,42 @@ class FixedNetworkRegressionAnalyzer:
             'avg_effective_size'
         ]
         
-        print(f"Initialized Fixed NetworkRegressionAnalyzer with data: {self.topic_data_file}")
+        print(f"Initialized Fixed NetworkRegressionAnalyzer with data: {len(self.df)}")
     
-    def load_and_prepare_data(self) -> pd.DataFrame:
-        """Load topic data and prepare for regression analysis with proper scaling."""
-        print("Loading and preparing topic data for fixed regression analysis...")
-        
-        # Load the topic analysis results
-        with open(self.topic_data_file, 'r') as f:
-            topic_data = json.load(f)
-        
-        # Convert to DataFrame
-        topic_list = []
-        for topic_id, data in topic_data.items():
-            topic_record = {
-                'topic_id': int(topic_id),
-                'total_papers': data['total_papers'],
-                'collaboration_papers': data['collaboration_papers']
-            }
-            
-            # Add all network metrics
-            for metric in self.network_metrics:
-                topic_record[metric] = data.get(metric, np.nan)
-            
-            topic_list.append(topic_record)
-        
-        df = pd.DataFrame(topic_list)
-        
-        # Create popularity classification (top/bottom 20%)
-        df_sorted = df.sort_values('total_papers', ascending=False)
-        n_topics = len(df_sorted)
-        cutoff_size = int(n_topics * 0.2)
-        
-        df['is_popular'] = 0
-        df.loc[df_sorted.head(cutoff_size).index, 'is_popular'] = 1
-        df.loc[df_sorted.tail(cutoff_size).index, 'is_popular'] = -1  # Mark niche topics
-        
+    # In class FixedNetworkRegressionAnalyzer:
+
+    def prepare_data(self) -> pd.DataFrame:
+        """Prepare loaded data for regression analysis with proper scaling."""
+        print("Preparing topic data for fixed regression analysis...")
+        df = self.df.copy()
+
+        # Create 'is_popular' column from the 'group' column for analysis
+        if 'group' in df.columns:
+            df['is_popular'] = 0
+            df.loc[df['group'] == 'popular', 'is_popular'] = 1
+            df.loc[df['group'] == 'niche', 'is_popular'] = -1
+        else:
+            raise ValueError("'group' column not found in DataFrame. Ensure the 'compare' step ran successfully.")
+
         # Create size variables
         df['num_authors'] = df['collaboration_papers'] * 2  # Rough estimate
-        df['log_num_authors'] = np.log1p(df['num_authors'])  # log(1 + x) to handle zeros
+        df['log_num_authors'] = np.log1p(df['num_authors'])
         df['log_total_papers'] = np.log1p(df['total_papers'])
         
-        # Clean data - remove invalid values and outliers
+        # Clean data
         for metric in self.network_metrics:
-            # Handle infinite values
-            df[metric] = df[metric].replace([np.inf, -np.inf], np.nan)
-            
-            # For proportion metrics, ensure they're in [0, 1]
-            if metric in ['collaboration_rate', 'repeated_collaboration_rate', 'degree_centralization', 
-                         'modularity', 'coreness_ratio', 'avg_constraint']:
-                df[metric] = df[metric].clip(0, 1)
-            
-            # Remove extreme outliers (beyond 3 standard deviations)
-            if df[metric].notna().sum() > 10:
-                z_scores = np.abs(stats.zscore(df[metric], nan_policy='omit'))
-                df.loc[z_scores > 3, metric] = np.nan
+            if metric in df.columns:
+                df[metric] = df[metric].replace([np.inf, -np.inf], np.nan)
+                if metric in ['collaboration_rate', 'repeated_collaboration_rate', 'degree_centralization', 
+                             'modularity', 'coreness_ratio', 'avg_constraint']:
+                    df[metric] = df[metric].clip(0, 1)
+                if df[metric].notna().sum() > 10:
+                    z_scores = np.abs(stats.zscore(df[metric], nan_policy='omit'))
+                    df.loc[z_scores > 3, metric] = np.nan
         
         print(f"Prepared {len(df)} topics for fixed regression analysis")
         print(f"Popular topics: {(df['is_popular'] == 1).sum()}")
         print(f"Niche topics: {(df['is_popular'] == -1).sum()}")
-        print(f"Middle topics: {(df['is_popular'] == 0).sum()}")
         
         return df
     
@@ -543,19 +528,22 @@ class FixedNetworkRegressionAnalyzer:
 def main():
     """Run the fixed regression analysis with standardized coefficients."""
     
+    # Read in input filepath from CONFIG
+    config = ConfigManager()
+    input_path = config.get_path('topic_classifications_path')
+    df = pd.read_csv(input_path)
+
     # Initialize fixed analyzer
-    analyzer = FixedNetworkRegressionAnalyzer(
-        "results/collaboration_analysis/topic_analysis_10metrics_20250607_124314.json"
-    )
-    
-    # Load and prepare data
-    df = analyzer.load_and_prepare_data()
+    analyzer = FixedNetworkRegressionAnalyzer(df)
+
+    # Prepare data
+    df_prepared = analyzer.prepare_data()
     
     # Run fixed regression analysis
-    regression_results = analyzer.run_fixed_regression_analysis(df)
+    regression_results = analyzer.run_fixed_regression_analysis(df_prepared)
     
     # Analyze size confounding with standardized variables
-    size_analysis = analyzer.analyze_size_confounding_fixed(df)
+    size_analysis = analyzer.analyze_size_confounding_fixed(df_prepared)
     
     # Create publication table with standardized coefficients
     publication_table = analyzer.create_publication_table_fixed(regression_results)

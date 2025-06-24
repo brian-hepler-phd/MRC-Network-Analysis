@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 """
 Popular vs Niche Topic Comparison Analysis with Sensitivity Testing
 ==================================================================
@@ -15,7 +21,6 @@ import json
 import pandas as pd
 import numpy as np
 from scipy import stats
-from pathlib import Path
 import argparse
 import logging
 from datetime import datetime

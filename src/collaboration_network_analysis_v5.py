@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 """
 Collaboration Network Analysis for Math Research Compass - Version 5
 ==============================================================================
@@ -27,7 +33,6 @@ import numpy as np
 import ast
 import json
 import random
-from pathlib import Path
 from datetime import datetime
 from collections import defaultdict, Counter
 import logging
@@ -35,6 +40,9 @@ import argparse
 from scipy import stats
 import warnings
 warnings.filterwarnings('ignore')
+
+# CONFIG 
+from src.config_manager import ConfigManager
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -947,8 +955,8 @@ class CollaborationNetworkAnalyzer:
 def main():
     """Main analysis function."""
     parser = argparse.ArgumentParser(description="10-Metric Collaboration Network Analysis V5 with Fixed SWC")
-    parser.add_argument("--data-path", default="data/cleaned/author_topic_networks_disambiguated_v4.csv", 
-                        help="Path to author-topic networks CSV")
+    # parser.add_argument("--data-path", default="data/cleaned/author_topic_networks_disambiguated_v4.csv", 
+    #                     help="Path to author-topic networks CSV")
     parser.add_argument("--sample-topics", type=str, default=None,
                         help="Comma-separated list of topics to analyze (default: all)")
     parser.add_argument("--test-run", action="store_true",
@@ -959,9 +967,12 @@ def main():
                         help="Enable detailed small-world diagnostics (default: True)")
    
     args = parser.parse_args()
+
+    config = ConfigManager()
+    input_path = config.get_path('disambiguated_authors_path')
    
     # Initialize analyzer
-    analyzer = CollaborationNetworkAnalyzer(args.data_path)
+    analyzer = CollaborationNetworkAnalyzer(input_path)
    
     # Load data
     try:
@@ -994,7 +1005,11 @@ def main():
    
     # Save results
     timestamp = analyzer.save_results(topic_results, summary_stats, comparison_results)
-   
+    
+    output_filename = f"topic_analysis_10metrics_fixed_{timestamp}.json"
+    output_path = analyzer.results_dir / output_filename
+    config.update_path('network_metrics_path', str(output_path))
+    
     # Print summary
     print("\n" + "="*70)
     print("10-METRIC COLLABORATION NETWORK ANALYSIS SUMMARY (V5 - FIXED SWC)")

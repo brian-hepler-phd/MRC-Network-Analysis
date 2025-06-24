@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 """
 COVID-19 Temporal Sensitivity Analysis Pipeline
 ==============================================
@@ -26,7 +32,6 @@ import json
 import subprocess
 import shutil
 import os
-from pathlib import Path
 from datetime import datetime
 import logging
 import argparse

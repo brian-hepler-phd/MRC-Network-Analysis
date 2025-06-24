@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 """
 BERTopic Analysis for Math Research Compass
 ------------------------------------------
@@ -16,9 +22,11 @@ import gc
 import argparse
 import logging
 from datetime import datetime
-from pathlib import Path
 import json
 from typing import Dict, List, Tuple, Optional
+
+# Config
+from src.config_manager import ConfigManager 
 
 import numpy as np
 import pandas as pd
@@ -322,7 +330,7 @@ def save_topic_data(model, df, topics):
     doc_topics = pd.DataFrame(doc_topics_dict)
     doc_topics.to_csv(TOPIC_DIR / f"document_topics_{timestamp}.csv", index=False)
     
-    # 4. Create a metadata file with information about this run
+    # 4.1 Create a metadata file with information about this run
     subjects = df["primary_category"].unique().tolist() if "primary_category" in df.columns else ["math.XX"]
     year_range = [int(df["year"].min()), int(df["year"].max())] if "year" in df.columns else [2020, 2023]
     
@@ -338,9 +346,17 @@ def save_topic_data(model, df, topics):
             "document_topics": f"document_topics_{timestamp}.csv",
         }
     }
+
+    metadata_filename = f"metadata_{timestamp}.json"
+    metadata_filepath = TOPIC_DIR / metadata_filename  
     
-    with open(TOPIC_DIR / f"metadata_{timestamp}.json", "w") as f:
+    with open(metadata_filepath, "w") as f:
         json.dump(metadata, f)
+
+    # 4.2 Update the CONFIG
+    config = ConfigManager()
+    config.update_path('latest_topic_metadata_path', str(metadata_filepath))
+
     
     logger.info(f"All topic data saved with timestamp: {timestamp}")
 
@@ -352,6 +368,10 @@ def main():
     
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
+
+    config = ConfigManager()
+    args.custom_csv = config.get_path('cleaned_snapshot', section='static_inputs')
+
     
     # Load data from the custom CSV
     df = load_custom_csv(args.custom_csv)

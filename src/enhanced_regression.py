@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 """
 Enhanced Regression Analysis with Continuous Popularity Variables
 ===============================================================
@@ -22,18 +28,19 @@ from scipy import stats
 from sklearn.preprocessing import StandardScaler, RobustScaler
 import seaborn as sns
 import matplotlib.pyplot as plt
-from pathlib import Path
 from datetime import datetime
 import warnings
 warnings.filterwarnings('ignore')
+
+from src.config_manager import ConfigManager
 
 class EnhancedNetworkRegressionAnalyzer:
     """
     Enhanced regression analysis with both binary and continuous popularity measures.
     """
     
-    def __init__(self, topic_data_file: str):
-        self.topic_data_file = Path(topic_data_file)
+    def __init__(self, df: pd.DataFrame):
+        self.df = df
         self.results_dir = Path("results/regression_analysis_enhanced")
         self.results_dir.mkdir(parents=True, exist_ok=True)
         
@@ -51,48 +58,30 @@ class EnhancedNetworkRegressionAnalyzer:
             'avg_effective_size'
         ]
         
-        print(f"Initialized Enhanced NetworkRegressionAnalyzer with data: {self.topic_data_file}")
+        print(f"Initialized Enhanced NetworkRegressionAnalyzer with data: {len(self.df)}")
     
-    def load_and_prepare_enhanced_data(self) -> pd.DataFrame:
-        """Load and prepare data with multiple popularity measures."""
-        print("Loading and preparing topic data with enhanced popularity measures...")
+
+    def prepare_enhanced_data(self) -> pd.DataFrame:
+        """Prepare data with multiple popularity measures."""
+        print("Preparing topic data with enhanced popularity measures...")
+        df = self.df.copy()
         
-        # Load the topic analysis results
-        if self.topic_data_file.suffix == '.json':
-            with open(self.topic_data_file, 'r') as f:
-                topic_data = json.load(f)
-            
-            # Convert to DataFrame
-            topic_list = []
-            for topic_id, data in topic_data.items():
-                topic_record = {
-                    'topic_id': int(topic_id),
-                    'total_papers': data['total_papers'],
-                    'collaboration_papers': data['collaboration_papers']
-                }
-                
-                # Add all network metrics
-                for metric in self.network_metrics:
-                    topic_record[metric] = data.get(metric, np.nan)
-                
-                topic_list.append(topic_record)
-            
-            df = pd.DataFrame(topic_list)
-        
-        elif self.topic_data_file.suffix == '.csv':
-            df = pd.read_csv(self.topic_data_file)
-        
+        # Create 'is_popular_binary' column from 'group' for binary models
+        if 'group' in df.columns:
+            df['is_popular_binary'] = 0
+            df.loc[df['group'] == 'popular', 'is_popular_binary'] = 1
+            df.loc[df['group'] == 'niche', 'is_popular_binary'] = -1
         else:
-            raise ValueError("Input file must be JSON or CSV format")
-        
+            raise ValueError("'group' column not found in DataFrame. Ensure the 'compare' step ran successfully.")
+
         # Create multiple popularity measures
         df = self._create_popularity_measures(df)
         
         # Create size variables
-        df['num_authors'] = df['collaboration_papers'] * 2  # Rough estimate
-        df['log_num_authors'] = np.log1p(df['num_authors'])  
+        df['num_authors'] = df['collaboration_papers'] * 2
+        df['log_num_authors'] = np.log1p(df['num_authors'])
         
-        # Clean data - remove invalid values and outliers
+        # Clean data
         df = self._clean_network_data(df)
         
         print(f"Prepared {len(df)} topics for enhanced regression analysis")
@@ -667,16 +656,19 @@ class EnhancedNetworkRegressionAnalyzer:
 def main():
     """Run the enhanced regression analysis with continuous popularity measures."""
     
+    # Read in input path for loading data   
+    config = ConfigManager()
+    input_path = config.get_path('topic_classifications_path')
+    df = pd.read_csv(input_path)
+
     # Initialize enhanced analyzer
-    analyzer = EnhancedNetworkRegressionAnalyzer(
-        "results/collaboration_analysis/topic_classifications_20250607_130259.csv"  # Use the CSV file from the project
-    )
+    analyzer = EnhancedNetworkRegressionAnalyzer(df)
     
     # Load and prepare data with enhanced popularity measures
-    df = analyzer.load_and_prepare_enhanced_data()
+    prepared_df = analyzer.prepare_enhanced_data()
     
     # Run enhanced regression analysis
-    regression_results = analyzer.run_enhanced_regression_analysis(df)
+    regression_results = analyzer.run_enhanced_regression_analysis(prepared_df)
     
     # Create enhanced publication table
     publication_table = analyzer.create_enhanced_publication_table(regression_results)

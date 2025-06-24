@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 """
 Advanced Author Name Disambiguation (AND) for Math Research Compass - Version 4
 ===============================================================================
@@ -34,7 +39,6 @@ import ast
 import re
 import json
 import unicodedata
-from pathlib import Path
 from datetime import datetime
 from collections import defaultdict, Counter
 from itertools import combinations
@@ -42,6 +46,9 @@ import logging
 import argparse
 import difflib
 import networkx as nx
+
+# CONFIG
+from src.config_manager import ConfigManager
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -775,15 +782,18 @@ if __name__ == "__main__":
 
 def main():
     parser = argparse.ArgumentParser(description="Advanced Author Name Disambiguation Pipeline V4")
-    parser.add_argument("--data-path", default="data/cleaned/author_topic_networks.csv")
+    # parser.add_argument("--data-path", default="data/cleaned/author_topic_networks.csv")
     parser.add_argument("--jaccard-threshold", type=float, default=0.5)
     parser.add_argument("--min-papers", type=int, default=2)
     parser.add_argument("--coauthor-weight", type=float, default=0.6)
     parser.add_argument("--test-run", action="store_true")
     
     args = parser.parse_args()
+
+    config = ConfigManager()
+    input_path = config.get_path('author_topic_network_path')
     
-    disambiguator = AdvancedAuthorDisambiguator(args.data_path)
+    disambiguator = AdvancedAuthorDisambiguator(input_path)
     
     if args.test_run:
         logger.info("Running in test mode on a subset of data.")
@@ -799,6 +809,10 @@ def main():
             min_papers=args.min_papers,
             coauthor_weight=args.coauthor_weight
         )
+        # The output path is constructed inside the class, so we use it.
+        output_path = disambiguator.output_path 
+        config.update_path('disambiguated_authors_path', str(output_path))
+        
     except Exception as e:
         logger.error("Pipeline failed.", exc_info=True)
 

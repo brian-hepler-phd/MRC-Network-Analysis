@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 """
 Popular vs Niche Topic Comparison Analysis
 ==========================================
@@ -14,10 +20,12 @@ import json
 import pandas as pd
 import numpy as np
 from scipy import stats
-from pathlib import Path
 import argparse
 import logging
 from datetime import datetime
+
+# CONFIG
+from src.config_manager import ConfigManager
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -426,17 +434,20 @@ class PopularNicheAnalyzer:
 def main():
     """Main analysis function."""
     parser = argparse.ArgumentParser(description="Popular vs Niche Topic Comparison")
-    parser.add_argument("--results-file", 
-                       default="results/collaboration_analysis/topic_analysis_10metrics_20250611_194954.json",
-                       help="Path to pre-computed topic analysis results JSON file")
+    # parser.add_argument("--results-file", 
+    #                   default="results/collaboration_analysis/topic_analysis_10metrics_20250611_194954.json",
+    #                   help="Path to pre-computed topic analysis results JSON file")
     parser.add_argument("--percentile-cutoff", type=float, default=0.2,
                        help="Percentile cutoff for popular/niche classification (default: 0.2 = 20%)")
     
     args = parser.parse_args()
     
     try:
+        config = ConfigManager()
+        input_path = config.get_path('network_metrics_path')
+
         # Initialize analyzer
-        analyzer = PopularNicheAnalyzer(args.results_file)
+        analyzer = PopularNicheAnalyzer(input_path)
         
         # Load pre-computed results
         df = analyzer.load_results()
@@ -455,6 +466,11 @@ def main():
         
         # Save results
         timestamp = analyzer.save_results(summary_report, popular_df, niche_df)
+
+        # Update Config paths
+        output_filename = f"topic_classifications_{timestamp}.csv"
+        output_path = analyzer.results_dir / output_filename
+        config.update_path('topic_classifications_path', str(output_path))
         
         # Print summary
         analyzer.print_summary(summary_report)

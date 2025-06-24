@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 """
 BERTopic Parameter Sensitivity Analysis
 --------------------------------------
@@ -17,7 +23,6 @@ import json
 import pandas as pd
 import numpy as np
 from datetime import datetime
-from pathlib import Path
 from typing import Dict, List, Tuple
 from itertools import product
 

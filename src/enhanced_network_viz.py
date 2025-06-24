@@ -1,3 +1,9 @@
+
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,6 +13,8 @@ from matplotlib.patches import Circle
 import ast
 import warnings
 warnings.filterwarnings('ignore')
+
+from src.config_manager import ConfigManager
 
 # Set style
 plt.style.use('default')
@@ -421,10 +429,16 @@ def main():
     """
     Main function to create enhanced systematic visualizations
     """
+
+    # Load in input filepaths from CONFIG
+    config = ConfigManager()
+    topic_classifications_path = config.get_path('topic_classifications_path')
+    disambiguated_authors_path = config.get_path('disambiguated_authors_path')
+
     # Initialize visualizer with your data files
     visualizer = EnhancedNetworkVisualizer(
-        'results/collaboration_analysis/topic_classifications_[YOUR_TIMESTAMP].csv',  # Update with your actual file path
-        'data/cleaned/author_topic_networks_disambiguated_v4.csv'                   # Update with your actual file path
+        topic_data_path= topic_classifications_path,
+        network_data_path = disambiguated_authors_path      
     )
     
     print("Creating systematic network comparison with multiple examples...")
