@@ -1,8 +1,8 @@
 static_inputs:
   cleaned_snapshot: data/cleaned/math_arxiv_snapshot.csv
 pipeline_outputs:
-  latest_topic_metadata_path: results/topics/metadata_20250626_125855.json
+  latest_topic_metadata_path: results/topics/metadata_20250630_151939.json
   author_topic_network_path: data/cleaned/author_topic_networks.csv
   disambiguated_authors_path: data/cleaned/author_topic_networks_disambiguated_v4.csv
-  network_metrics_path: results/collaboration_analysis/topic_analysis_10metrics_fixed_20250626_130232.json
-  topic_classifications_path: results/collaboration_analysis/topic_classifications_20250626_130233.csv
+  network_metrics_path: results/collaboration_analysis/topic_analysis_10metrics_fixed_20250630_152317.json
+  topic_classifications_path: results/collaboration_analysis/topic_classifications_20250630_155040.csv
