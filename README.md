@@ -103,14 +103,14 @@ This will execute the following steps in sequence, using the `config.yaml` file 
 The `src/` directory contains the modular scripts that perform each stage of the analysis.
 
 -   **`config_manager.py`**: A helper module for reading from and writing to `config.yaml`.
--   **`BERTopic_analyzer.py`**: Step 1 - Topic Modeling.
--   **`prepare_network_data.py`**: Step 2 - Data Preparation.
--   **`author_disambiguation_v4.py`**: Step 3 - Author Name Disambiguation.
--   **`collaboration_network_analysis_v5.py`**: Step 4 - Network Metrics Calculation.
--   **`analyze_popular_vs_niche.py`**: Step 5a - Baseline Group Comparison.
--   **`bootstrap_CI_analysis.py`**: Step 5b - Bootstrap Analysis for CIs.
--   **`fixed_regression_analysis.py`**: Step 5c - Main Regression Analysis.
--   **`enhanced_regression.py`**: Step 5d - Continuous Popularity Regression.
--   **`sensitivity_analysis.py`**, **`bertopic_sensitivity_analysis.py`**, **`covid_temporal_sensitivity.py`**: Step 6 - Robustness and Sensitivity Checks.
--   **`enhanced_network_viz.py`**: Step 7 - Final Visualizations.
+-   **`1_build_topics.py`**: Step 1 - Topic Modeling.
+-   **`2_prepare_network_data.py`**: Step 2 - Data Preparation.
+-   **`3_disambiguate_authors.py`**: Step 3 - Author Name Disambiguation.
+-   **`4_calculated_network_metrics.py`**: Step 4 - Network Metrics Calculation.
+-   **`5a_compare_groups.py`**: Step 5a - Baseline Group Comparison.
+-   **`5b_bootstrap_effects.py`**: Step 5b - Bootstrap Analysis for CIs.
+-   **`5c_regression_size_controls.py`**: Step 5c - Main Regression Analysis.
+-   **`5d_regression_binary_vs_continuous.py`**: Step 5d - Continuous Popularity Regression.
+-   **`6_generate_figures`**: Step 6 - Final Visualizations.
+-   **`validation_cutoff_thresholds.py`**, **`validation_topic_modeling.py`**, **`validation_temporal.py`**: Step 7 - Robustness and Sensitivity Checks.
 ```
