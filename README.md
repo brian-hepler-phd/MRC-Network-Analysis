@@ -2,7 +2,7 @@
 
 **Brian Hepler**
 
-[![arXiv](https://img.shields.io/badge/arXiv-2506.22946v1-b31b1b.svg)](https://arxiv.org/abs/2506.22946v1) | [Math Research Compass](https://mathresearchcompass.com) | [![arXiv](https://img.shields.io/badge/arXiv-2506.22946v1-b31b1b.svg)](https://arxiv.org/abs/2506.22946v1) | [bhepler.com](https://bhepler.com) 
+[![arXiv](https://img.shields.io/badge/arXiv-2506.22946v1-b31b1b.svg)](https://arxiv.org/abs/2506.22946v1) | [Math Research Compass](https://mathresearchcompass.com) | [bhepler.com](https://bhepler.com) 
 
 This repository contains the complete, automated analysis pipeline for the paper "Modular versus Hierarchical: A Structural Signature of Topic Popularity in Mathematical Research." The workflow processes raw metadata from the arXiv preprint server, identifies research topics, builds and analyzes co-authorship networks, and performs a series of statistical and sensitivity analyses to characterize the structural differences between popular and niche fields in mathematics.
 
