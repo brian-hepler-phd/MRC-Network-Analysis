@@ -120,8 +120,8 @@ The `src/` directory contains the modular scripts that perform each stage of the
 
 You can find the research article hosted on Hugging Face [here](https://huggingface.co/papers/2506.22946), as well as the main datasets [here](https://huggingface.co/datasets/BrainHelper/MRC-Network-Analysis/tree/main)! The specific datasets are
 
-* 'author_topic_networks_disambiguated.csv': the results of '3_disambiguate_authors.py' script, containing the list of disambiguated authors 
-* 'documents_topics.csv': the results of '1_build_topics.py' script, containing article metadata and their assigned topic by BERTopic
-* 'topic_info.csv': the results of '1_build_topics.py' script, containing descriptive statisitics about discovered topics
-* 'topic_metrics.csv': the results of '4_calculated_network_metrics.py' script, containing the 10 network metrics for the collaboration networks for each of the discovered topics. 
+* `author_topic_networks_disambiguated.csv`: the results of `3_disambiguate_authors.py` script, containing the list of disambiguated authors 
+* `documents_topics.csv`: the results of `1_build_topics.py` script, containing article metadata and their assigned topic by BERTopic
+* `topic_info.csv`: the results of `1_build_topics.py` script, containing descriptive statisitics about discovered topics
+* `topic_metrics.csv`: the results of `4_calculated_network_metrics.py` script, containing the 10 network metrics for the collaboration networks for each of the discovered topics. 
 ```
